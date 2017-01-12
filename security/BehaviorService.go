@@ -44,11 +44,12 @@ func (P *BehaviorPloyList) SetValue(key string, value interface{}) {
 
 type BehaviorService struct {
 	app.Service
-	Get    *BehaviorTask
-	Create *BehaviorCreateTask
-	Verify *BehaviorVerifyTask
-	Remove *BehaviorRemoveTask
-	Query  *BehaviorQueryTask
+	Get      *BehaviorTask
+	Create   *BehaviorCreateTask
+	Verify   *BehaviorVerifyTask
+	Remove   *BehaviorRemoveTask
+	Query    *BehaviorQueryTask
+	Disabled *BehaviorDisabledTask
 
 	Ploys *BehaviorPloyList
 }
@@ -109,9 +110,9 @@ func (S *BehaviorService) HandleBehaviorVerifyTask(a *SecurityApp, task *Behavio
 
 					if ploy.MaxCount != 0 || ploy.MinInterval != 0 {
 
-						rows, err := db.Query(fmt.Sprintf("SELECT COUNT(*) as c, MAX(ctime) as ctime FROM %s%s WHERE ctime <= ? AND ctime >= ? AND identity=? AND action=? ORDER BY id DESC",
+						rows, err := db.Query(fmt.Sprintf("SELECT COUNT(*) as c, MAX(ctime) as ctime FROM %s%s WHERE status=? AND ctime <= ? AND ctime >= ? AND identity=? AND action=? ORDER BY id DESC",
 							a.DB.Prefix, a.BehaviorTable.Name),
-							now, now-ploy.Duration, EncodeIdentity(task.Identity), task.Action)
+							BehaviorStatusEnabled, now, now-ploy.Duration, EncodeIdentity(task.Identity), task.Action)
 
 						if err != nil {
 							return err
@@ -158,6 +159,31 @@ func (S *BehaviorService) HandleBehaviorVerifyTask(a *SecurityApp, task *Behavio
 			task.Result.Errno = ERROR_SECURITY
 			task.Result.Errmsg = err.Error()
 		}
+	}
+
+	return nil
+}
+
+func (S *BehaviorService) HandleBehaviorDisabledTask(a *SecurityApp, task *BehaviorDisabledTask) error {
+
+	var db, err = a.GetDB()
+
+	if err != nil {
+		task.Result.Errno = ERROR_SECURITY
+		task.Result.Errmsg = err.Error()
+		return nil
+	}
+
+	now := time.Now().Unix()
+
+	_, err = db.Exec(fmt.Sprintf("UPDATE %s%s SET status=? WHERE status=? AND ctime <= ? AND identity=? AND action=?",
+		a.DB.Prefix, a.BehaviorTable.Name),
+		BehaviorStatusDisabled, BehaviorStatusEnabled, now, EncodeIdentity(task.Identity), task.Action)
+
+	if err != nil {
+		task.Result.Errno = ERROR_SECURITY
+		task.Result.Errmsg = err.Error()
+		return nil
 	}
 
 	return nil

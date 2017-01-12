@@ -9,6 +9,9 @@ import (
 	"github.com/kkserver/kk-lib/kk/app/remote"
 )
 
+const BehaviorStatusEnabled = 0
+const BehaviorStatusDisabled = 300
+
 /**
  * 行为记录
  */
@@ -17,6 +20,7 @@ type Behavior struct {
 	Identity string `json:"identity"`
 	Action   string `json:"action"` //行为
 	Code     string `json:"code"`   //跟踪代码
+	Status   int    `json:"status"`
 	Ctime    int64  `json:"ctime"`
 }
 
@@ -24,11 +28,11 @@ type Behavior struct {
  * 验证码
  */
 type Code struct {
-	Id      int64  `json:"id"`
-	Name    string `json:"name"`
-	Code    string `json:"code"`
-	Expires int64  `json:"expires"`
-	Ctime   int64  `json:"ctime"`
+	Id       int64  `json:"id"`
+	Identity string `json:"identity"`
+	Code     string `json:"code"`
+	Expires  int64  `json:"expires"`
+	Ctime    int64  `json:"ctime"`
 }
 
 type SecurityApp struct {
