@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/kkserver/kk-lib/kk"
 	"github.com/kkserver/kk-lib/kk/app"
+	"github.com/kkserver/kk-lib/kk/dynamic"
 	"strings"
 	"time"
 )
@@ -21,6 +22,26 @@ type BehaviorPloy struct {
 	Errmsg      string //错误说明
 }
 
+type BehaviorPloyList struct {
+	Ploys []*BehaviorPloy
+}
+
+func (P *BehaviorPloyList) SetValue(key string, value interface{}) {
+
+	if P.Ploys == nil {
+		P.Ploys = []*BehaviorPloy{}
+	}
+
+	if strings.HasPrefix(key, "@") {
+		v := BehaviorPloy{}
+		dynamic.Set(&v, key[1:], value)
+		P.Ploys = append(P.Ploys, &v)
+	} else if len(P.Ploys) > 0 {
+		dynamic.Set(P.Ploys[len(P.Ploys)-1], key, value)
+	}
+
+}
+
 type BehaviorService struct {
 	app.Service
 	Get    *BehaviorTask
@@ -29,7 +50,7 @@ type BehaviorService struct {
 	Remove *BehaviorRemoveTask
 	Query  *BehaviorQueryTask
 
-	Ploys map[string]*BehaviorPloy
+	Ploys *BehaviorPloyList
 }
 
 func (S *BehaviorService) Handle(a app.IApp, task app.ITask) error {
@@ -80,9 +101,9 @@ func (S *BehaviorService) HandleBehaviorVerifyTask(a *SecurityApp, task *Behavio
 
 	err = func() error {
 
-		if S.Ploys != nil {
+		if S.Ploys != nil && S.Ploys.Ploys != nil {
 
-			for _, ploy := range S.Ploys {
+			for _, ploy := range S.Ploys.Ploys {
 
 				if strings.HasPrefix(task.Action, ploy.Prefix) {
 
