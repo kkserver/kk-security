@@ -128,7 +128,7 @@ func (S *CodeService) HandleCodeVerifyTask(a *SecurityApp, task *CodeVerifyTask)
 	var v = Code{}
 	var scaner = kk.NewDBScaner(&v)
 
-	rows, err := kk.DBQuery(db, &a.CodeTable, a.DB.Prefix, " WHERE identity=?", identity)
+	rows, err := kk.DBQuery(db, &a.CodeTable, a.DB.Prefix, " WHERE identity=? ORDER BY id ASC LIMIT 1", identity)
 
 	if err != nil {
 		task.Result.Errno = ERROR_SECURITY
