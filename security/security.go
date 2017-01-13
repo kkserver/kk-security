@@ -41,6 +41,7 @@ type SecurityApp struct {
 
 	Remote   *remote.Service
 	Behavior *BehaviorService
+	Code     *CodeService
 
 	BehaviorTable kk.DBTable
 	CodeTable     kk.DBTable
