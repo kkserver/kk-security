@@ -106,6 +106,8 @@ func (S *CodeService) HandleCodeCreateTask(a *SecurityApp, task *CodeCreateTask)
 
 	}
 
+	task.Result.Code = &v
+
 	return nil
 }
 
