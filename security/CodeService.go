@@ -148,13 +148,13 @@ func (S *CodeService) HandleCodeVerifyTask(a *SecurityApp, task *CodeVerifyTask)
 			return nil
 		}
 
-		if now > v.Ctime+v.Expires {
-			task.Result.Errno = ERROR_SECURITY_CODE_EXPIRES
-			task.Result.Errmsg = "Code has expired"
-			return nil
-		} else if task.Code != v.Code {
+		if task.Code != v.Code {
 			task.Result.Errno = ERROR_SECURITY_CODE
 			task.Result.Errmsg = "Code error"
+			return nil
+		} else if now > v.Ctime+v.Expires {
+			task.Result.Errno = ERROR_SECURITY_CODE_EXPIRES
+			task.Result.Errmsg = "Code has expired"
 			return nil
 		}
 

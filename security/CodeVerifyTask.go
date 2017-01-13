@@ -11,7 +11,7 @@ type CodeVerifyTaskResult struct {
 type CodeVerifyTask struct {
 	app.Task
 	Identity string `json:"identity"`
-	Code     string `json:"expires"`
+	Code     string `json:"code"`
 	Result   CodeVerifyTaskResult
 }
 
